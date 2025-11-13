@@ -1,0 +1,124 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual Environment
+venv/
+ENV/
+env/
+.venv
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# OS
+Thumbs.db
+Desktop.ini
+
+# Temporary files
+*.tmp
+*.temp
+temp/
+tmp/
+
+# Node modules (for React app)
+node_modules/
+src/web/react-app/node_modules/
+src/web/react-app/dist/
+src/web/react-app/.vite/
+
+# Audio files (temporary)
+*.mp3
+*.wav
+*.webm
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# API Keys and Secrets
+*_secrets.json
+config/*_key.json
+
+# Model weights (if any)
+*.pt
+*.pth
+*.onnx
+*.h5
+
+# Coverage reports
+htmlcov/
+.tox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+
+# Pytest
+.pytest_cache/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# Flutter/Dart (mobile app)
+mobile_app/.dart_tool/
+mobile_app/.flutter-plugins
+mobile_app/.flutter-plugins-dependencies
+mobile_app/.packages
+mobile_app/build/
+mobile_app/ios/Flutter/flutter_export_environment.sh
+mobile_app/ios/Flutter/Generated.xcconfig
+mobile_app/ios/Pods/
+mobile_app/android/.gradle/
+mobile_app/android/gradle/
+mobile_app/android/app/build/
+mobile_app/android/captures/
+mobile_app/android/local.properties
+mobile_app/android/key.properties
+
+# Ignore recreated/duplicate files
+*.RECREATED
+*.backup
+*.bak
+
+# Specific to this project
+cleanup_shadow.py

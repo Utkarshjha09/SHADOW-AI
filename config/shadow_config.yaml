@@ -1,0 +1,58 @@
+# SHADOW Voice Assistant Configuration
+
+assistant:
+  name: "SHADOW"
+  signature_phrase: "SHADOW online."
+  persona: "You are SHADOW, a personal AI assistant that can communicate in both Hindi and English. Respond naturally and helpfully in the language the user speaks."
+
+wake_words:
+  - "hey shadow"
+  - "hi shadow" 
+  - "hello shadow"
+  - "shadow"
+  - "hey ashadow"
+  - "hii shadow"
+  - "kya shadow"
+  - "suun shadow"
+  - "suno shadow"
+  - "shadow suno"
+  - "shadow kya"
+  - "shadow bolo"
+  - "shadow batao"
+
+languages:
+  supported: ["en", "hi"]
+  default: "en"
+  auto_detect: true
+
+ollama:
+  host: "http://localhost:11434"
+  model: "llama2"
+  timeout: 30
+  options:
+    temperature: 0.7
+    max_tokens: 150
+
+voice:
+  input_timeout: 5
+  recognition_language: "auto"
+  tts_engine: "edge"  # Options: edge, gtts, pyttsx3
+  wake_word_threshold: 70
+
+web:
+  port: 8000
+  host: "0.0.0.0"
+  debug: false
+  cors_enabled: true
+
+mobile:
+  api_base_url: "http://localhost:8000/api"
+  flutter_package: "shadow_voice_assistant"
+
+features:
+  voice_input: true
+  text_input: true
+  wake_word_detection: true
+  multilingual: true
+  conversation_memory: true
+  tools_integration: true

@@ -1,0 +1,25 @@
+pyyaml
+openai
+speechrecognition
+pyttsx3
+pyaudio
+psutil
+pytest
+requests
+fuzzywuzzy
+python-levenshtein
+edge-tts
+gtts
+openai-whisper
+pydub
+torch
+numpy
+flask
+flask-cors
+werkzeug
+# Hindi/Indic language support
+indic-transliteration
+googletrans==4.0.0rc1
+gTTS
+langdetect
+transliterate

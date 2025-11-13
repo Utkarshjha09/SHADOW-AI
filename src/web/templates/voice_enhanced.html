@@ -1,0 +1,1481 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SHADOW Voice Assistant - Enhanced</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 800px;
+            width: 100%;
+            padding: 30px;
+            backdrop-filter: blur(10px);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            color: #667eea;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .header .logo {
+            font-size: 1.2em;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 1.1em;
+        }
+
+        /* Mode Toggle */
+        .mode-toggle-section {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .mode-toggle-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 15px;
+        }
+
+        .mode-toggle-header h3 {
+            color: #333;
+            font-size: 1.2em;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .toggle-switch {
+            position: relative;
+            width: 60px;
+            height: 30px;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: 0.4s;
+            border-radius: 30px;
+        }
+
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 22px;
+            width: 22px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: 0.4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .toggle-slider {
+            background-color: #667eea;
+        }
+
+        input:checked + .toggle-slider:before {
+            transform: translateX(30px);
+        }
+
+        .mode-description {
+            display: flex;
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .mode-card {
+            flex: 1;
+            padding: 15px;
+            border-radius: 10px;
+            background: white;
+            border: 2px solid #e0e0e0;
+            transition: all 0.3s;
+        }
+
+        .mode-card.active {
+            border-color: #667eea;
+            background: #f0f4ff;
+        }
+
+        .mode-card h4 {
+            color: #667eea;
+            margin-bottom: 8px;
+            font-size: 1em;
+        }
+
+        .mode-card p {
+            color: #666;
+            font-size: 0.9em;
+            line-height: 1.4;
+        }
+
+        /* Mic Status */
+        .mic-status {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .mic-button {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            border: none;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-size: 3em;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .mic-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 15px 40px rgba(102, 126, 234, 0.6);
+        }
+
+        .mic-button:active {
+            transform: scale(0.95);
+        }
+
+        .mic-button.listening {
+            animation: pulse 1.5s infinite;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+
+        .mic-button.always-on {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            animation: glow 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        @keyframes glow {
+            0%, 100% { box-shadow: 0 10px 30px rgba(79, 172, 254, 0.4); }
+            50% { box-shadow: 0 10px 40px rgba(79, 172, 254, 0.8), 0 0 20px rgba(79, 172, 254, 0.6); }
+        }
+
+        .status-text {
+            margin-top: 15px;
+            font-size: 1.1em;
+            color: #333;
+            font-weight: 500;
+        }
+
+        .status-text.listening {
+            color: #f5576c;
+        }
+
+        .status-text.always-on {
+            color: #00f2fe;
+        }
+
+        /* Wake Words Display */
+        .wake-words {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        .wake-words h4 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 1em;
+        }
+
+        .wake-words-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .wake-word-tag {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: 500;
+        }
+
+        /* Chat Area */
+        .chat-container {
+            background: white;
+            border-radius: 15px;
+            height: 400px;
+            overflow-y: auto;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 2px solid #e0e0e0;
+        }
+
+        .message {
+            margin-bottom: 15px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .message.user {
+            flex-direction: row-reverse;
+        }
+
+        .message-content {
+            max-width: 70%;
+            padding: 12px 16px;
+            border-radius: 15px;
+            line-height: 1.4;
+        }
+
+        .message.user .message-content {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-bottom-right-radius: 4px;
+        }
+
+        .message.assistant .message-content {
+            background: #f0f0f0;
+            color: #333;
+            border-bottom-left-radius: 4px;
+        }
+
+        .message.system .message-content {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+            border-bottom-left-radius: 4px;
+            font-size: 0.9em;
+            max-width: 85%;
+        }
+
+        .message-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2em;
+            flex-shrink: 0;
+        }
+
+        .message.user .message-icon {
+            background: #667eea;
+            color: white;
+        }
+
+        .message.assistant .message-icon {
+            background: #764ba2;
+            color: white;
+        }
+
+        .message.system .message-icon {
+            background: #ffc107;
+            color: #333;
+        }
+
+        /* Permission Status */
+        .permission-status {
+            text-align: center;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-weight: 500;
+        }
+
+        .permission-status.granted {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .permission-status.denied {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .permission-status.pending {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+
+        /* Language Indicator */
+        .language-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            background: #667eea;
+            color: white;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.8em;
+            margin-left: 10px;
+        }
+
+        /* Text Input Area */
+        .text-input-area {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .text-input {
+            flex: 1;
+            padding: 12px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 25px;
+            font-size: 1em;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .text-input:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .send-button {
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-width: 100px;
+        }
+
+        .send-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .send-button:active {
+            transform: translateY(0);
+        }
+
+        .send-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Settings Button */
+        .settings-button {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            width: 50px;
+            height: 50px;
+            background: white;
+            border: 2px solid #667eea;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 1.5em;
+            transition: all 0.3s ease;
+            z-index: 1000;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .settings-button:hover {
+            background: #667eea;
+            color: white;
+            transform: rotate(90deg);
+        }
+
+        /* Settings Modal */
+        .settings-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .settings-modal.active {
+            display: flex;
+        }
+
+        .settings-content {
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        .settings-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        .settings-header h2 {
+            margin: 0;
+            color: #333;
+            font-size: 1.5em;
+        }
+
+        .close-settings {
+            background: none;
+            border: none;
+            font-size: 2em;
+            cursor: pointer;
+            color: #999;
+            transition: color 0.3s ease;
+        }
+
+        .close-settings:hover {
+            color: #333;
+        }
+
+        .settings-section {
+            margin-bottom: 25px;
+        }
+
+        .settings-section h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 1.1em;
+        }
+
+        .setting-item {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+        }
+
+        .setting-item label {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            font-weight: 500;
+        }
+
+        .setting-item input[type="radio"] {
+            margin-right: 10px;
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+
+        .setting-description {
+            margin-top: 8px;
+            font-size: 0.9em;
+            color: #666;
+            padding-left: 30px;
+        }
+
+        .wake-sound-option {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .wake-sound-option input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+
+        .test-sound-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: all 0.3s ease;
+        }
+
+        .test-sound-btn:hover {
+            background: #764ba2;
+            transform: scale(1.05);
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px;
+            }
+
+            .header h1 {
+                font-size: 1.8em;
+            }
+
+            .mode-description {
+                flex-direction: column;
+            }
+
+            .mic-button {
+                width: 100px;
+                height: 100px;
+                font-size: 2.5em;
+            }
+        }
+
+        /* Loading spinner */
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <!-- Settings Button -->
+    <button class="settings-button" id="settingsButton" title="Settings">⚙️</button>
+
+    <!-- Settings Modal -->
+    <div class="settings-modal" id="settingsModal">
+        <div class="settings-content">
+            <div class="settings-header">
+                <h2>⚙️ Settings</h2>
+                <button class="close-settings" id="closeSettings">&times;</button>
+            </div>
+
+            <!-- Microphone Mode Setting -->
+            <div class="settings-section">
+                <h3>🎤 Microphone Mode</h3>
+                
+                <div class="setting-item">
+                    <label>
+                        <input type="radio" name="micMode" value="normal" id="normalMode" checked>
+                        <strong>Normal Mode (Auto-Start)</strong>
+                    </label>
+                    <div class="setting-description">
+                        ✅ Automatically starts listening when page opens<br>
+                        ✅ No wake word needed - just speak directly<br>
+                        ✅ Best for active use and quick questions<br>
+                        ⚠️ Always listening while page is open
+                    </div>
+                </div>
+
+                <div class="setting-item">
+                    <label>
+                        <input type="radio" name="micMode" value="standard" id="standardModeRadio">
+                        <strong>Standard Mode (Wake Word)</strong>
+                    </label>
+                    <div class="setting-description">
+                        ✅ Listens in background for wake words<br>
+                        ✅ Privacy-focused - only activates on wake word<br>
+                        ✅ Say "Hey Shadow" or "Sunn Shadow" to activate<br>
+                        ✅ Works even when page is minimized
+                    </div>
+                </div>
+            </div>
+
+            <!-- Wake Sound Setting -->
+            <div class="settings-section">
+                <h3>🔔 Wake Sound</h3>
+                <div class="setting-item">
+                    <div class="wake-sound-option">
+                        <input type="checkbox" id="wakeSoundEnabled" checked>
+                        <label for="wakeSoundEnabled"><strong>Play sound when activated</strong></label>
+                    </div>
+                    <div class="setting-description">
+                        Plays a beep sound when SHADOW is listening to your command
+                    </div>
+                    <button class="test-sound-btn" id="testSoundBtn">🔊 Test Sound</button>
+                </div>
+            </div>
+
+            <!-- Info Section -->
+            <div class="settings-section">
+                <h3>ℹ️ How It Works</h3>
+                <div class="setting-description">
+                    <strong>Normal Mode:</strong> Page opens → Mic starts automatically → Speak your question<br><br>
+                    <strong>Standard Mode:</strong> Page opens → Background listening → Say wake word → Speak your question
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>
+                <span class="logo">🌟</span>
+                SHADOW Voice Assistant
+                <span class="logo">🎙️</span>
+            </h1>
+            <p>Your Intelligent Bilingual Assistant</p>
+        </div>
+
+        <!-- Permission Status -->
+        <div id="permissionStatus" class="permission-status pending">
+            🎤 Microphone permission: <strong>Requesting...</strong>
+        </div>
+
+        <!-- Mode Toggle Section -->
+        <div class="mode-toggle-section">
+            <div class="mode-toggle-header">
+                <h3>
+                    <span>⚙️</span>
+                    Listening Mode
+                </h3>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="modeToggle">
+                    <span class="toggle-slider"></span>
+                </label>
+            </div>
+            
+            <div class="mode-description">
+                <div class="mode-card" id="simpleMode">
+                    <h4>📱 Simple Mode</h4>
+                    <p>Click microphone to talk. Mic is OFF when page is inactive. Best for privacy.</p>
+                </div>
+                <div class="mode-card active" id="standardMode">
+                    <h4>🔄 Standard Mode (Always-On)</h4>
+                    <p>Always listening for wake words in background. Responds instantly even when page is minimized.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Wake Words -->
+        <div class="wake-words">
+            <h4>💬 Wake Words (Standard Mode):</h4>
+            <div class="wake-words-list">
+                <span class="wake-word-tag">Hey Shadow</span>
+                <span class="wake-word-tag">Hi Shadow</span>
+                <span class="wake-word-tag">Ok Shadow</span>
+                <span class="wake-word-tag">Sunn Shadow</span>
+                <span class="wake-word-tag">Bol Shadow</span>
+                <span class="wake-word-tag">Kya Shadow</span>
+            </div>
+        </div>
+
+        <!-- Mic Status -->
+        <div class="mic-status">
+            <button class="mic-button" id="micButton" title="Click to activate microphone">
+                🎤
+            </button>
+            <div class="status-text" id="statusText">
+                Click to start
+            </div>
+        </div>
+
+        <!-- Chat Container -->
+        <div class="chat-container" id="chatContainer">
+            <div class="message assistant">
+                <div class="message-icon">🌟</div>
+                <div class="message-content">
+                    Hello! I'm SHADOW, your bilingual voice assistant. Click the microphone or use wake words to start!
+                </div>
+            </div>
+        </div>
+
+        <!-- Text Input Area -->
+        <div class="text-input-area">
+            <input 
+                type="text" 
+                class="text-input" 
+                id="textInput" 
+                placeholder="Type your message here... (or use voice above)"
+                autocomplete="off"
+            />
+            <button class="send-button" id="sendButton">Send 📤</button>
+        </div>
+    </div>
+
+    <script>
+        // Configuration
+        const API_BASE = window.location.origin;
+        const WAKE_WORDS = [
+            'hey shadow', 'hi shadow', 'hello shadow', 'ok shadow',
+            'sunn shadow', 'suno shadow', 'bol shadow', 'kya shadow'
+        ];
+
+        // State
+        let isStandardMode = true; // true = Wake word mode, false = Simple click mode
+        let isNormalMode = true;   // true = Auto-start, false = Wake word required
+        let isListening = false;
+        let isProcessing = false;
+        let mediaRecorder = null;
+        let audioChunks = [];
+        let recognition = null;
+        let permissionGranted = false;
+        let alwaysOnInterval = null;
+        let wakeSoundEnabled = true;
+
+        // Elements
+        const modeToggle = document.getElementById('modeToggle');
+        const micButton = document.getElementById('micButton');
+        const statusText = document.getElementById('statusText');
+        const chatContainer = document.getElementById('chatContainer');
+        const permissionStatus = document.getElementById('permissionStatus');
+        const simpleMode = document.getElementById('simpleMode');
+        const standardMode = document.getElementById('standardMode');
+        const textInput = document.getElementById('textInput');
+        const sendButton = document.getElementById('sendButton');
+        
+        // Settings elements
+        const settingsButton = document.getElementById('settingsButton');
+        const settingsModal = document.getElementById('settingsModal');
+        const closeSettings = document.getElementById('closeSettings');
+        const normalModeRadio = document.getElementById('normalMode');
+        const standardModeRadio = document.getElementById('standardModeRadio');
+        const wakeSoundCheckbox = document.getElementById('wakeSoundEnabled');
+        const testSoundBtn = document.getElementById('testSoundBtn');
+
+        // Initialize
+        async function initialize() {
+            // Load saved settings
+            loadSettings();
+            
+            // Set initial mode
+            modeToggle.checked = isStandardMode;
+            updateModeUI();
+
+            // Request microphone permission
+            await requestMicrophonePermission();
+
+            // Setup Web Speech API for wake word detection
+            if ('webkitSpeechRecognition' in window) {
+                setupSpeechRecognition();
+            } else {
+                addMessage('assistant', '⚠️ Web Speech API not supported. Please use Chrome/Edge.');
+            }
+
+            // Event listeners
+            modeToggle.addEventListener('change', handleModeToggle);
+            micButton.addEventListener('click', handleMicClick);
+            
+            // Text input listeners
+            sendButton.addEventListener('click', handleTextSend);
+            textInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    handleTextSend();
+                }
+            });
+            
+            // Settings listeners
+            settingsButton.addEventListener('click', openSettings);
+            closeSettings.addEventListener('click', closeSettingsModal);
+            settingsModal.addEventListener('click', (e) => {
+                if (e.target === settingsModal) closeSettingsModal();
+            });
+            normalModeRadio.addEventListener('change', handleMicModeChange);
+            standardModeRadio.addEventListener('change', handleMicModeChange);
+            wakeSoundCheckbox.addEventListener('change', handleWakeSoundChange);
+            testSoundBtn.addEventListener('click', () => playWakeSound());
+            
+            // Auto-start based on mode
+            if (isNormalMode && permissionGranted) {
+                setTimeout(() => {
+                    addMessage('system', '🎤 Normal mode: Auto-starting microphone...');
+                    startNormalMode();
+                }, 1000);
+            }
+        }
+
+        // Settings functions
+        function loadSettings() {
+            const savedMode = localStorage.getItem('shadowMicMode') || 'normal';
+            const savedWakeSound = localStorage.getItem('shadowWakeSound') !== 'false';
+            
+            isNormalMode = (savedMode === 'normal');
+            wakeSoundEnabled = savedWakeSound;
+            
+            if (normalModeRadio) normalModeRadio.checked = isNormalMode;
+            if (standardModeRadio) standardModeRadio.checked = !isNormalMode;
+            if (wakeSoundCheckbox) wakeSoundCheckbox.checked = wakeSoundEnabled;
+        }
+
+        function saveSettings() {
+            localStorage.setItem('shadowMicMode', isNormalMode ? 'normal' : 'standard');
+            localStorage.setItem('shadowWakeSound', wakeSoundEnabled);
+        }
+
+        function openSettings() {
+            settingsModal.classList.add('active');
+        }
+
+        function closeSettingsModal() {
+            settingsModal.classList.remove('active');
+        }
+
+        function handleMicModeChange() {
+            const newMode = normalModeRadio.checked ? 'normal' : 'standard';
+            isNormalMode = (newMode === 'normal');
+            saveSettings();
+            
+            // Stop current listening
+            if (isListening) {
+                stopStandardMode();
+            }
+            
+            // Apply new mode
+            if (isNormalMode) {
+                addMessage('system', '✅ Switched to Normal Mode - Auto-start listening');
+                setTimeout(() => startNormalMode(), 500);
+            } else {
+                addMessage('system', '✅ Switched to Standard Mode - Wake word required');
+                isStandardMode = true;
+                setTimeout(() => startStandardMode(), 500);
+            }
+        }
+
+        function handleWakeSoundChange() {
+            wakeSoundEnabled = wakeSoundCheckbox.checked;
+            saveSettings();
+            addMessage('system', wakeSoundEnabled ? '🔔 Wake sound enabled' : '🔕 Wake sound disabled');
+        }
+
+        // Normal Mode (Auto-start, no wake word)
+        function startNormalMode() {
+            if (!permissionGranted) {
+                addMessage('assistant', '⚠️ Please grant microphone permission first.');
+                return;
+            }
+
+            isListening = true;
+            isStandardMode = false; // Not using wake words
+            micButton.classList.add('always-on');
+            statusText.textContent = '🎤 Normal Mode: Always listening...';
+            statusText.classList.add('always-on');
+
+            try {
+                recognition.continuous = true;
+                recognition.start();
+                if (wakeSoundEnabled) playWakeSound();
+                addMessage('system', '🎤 Listening started - Speak your question directly (no wake word needed)');
+            } catch (e) {
+                console.log('Recognition already started or error:', e);
+            }
+        }
+
+        // Handle text message send
+        async function handleTextSend() {
+            const message = textInput.value.trim();
+            if (!message) return;
+
+            // Clear input
+            textInput.value = '';
+            sendButton.disabled = true;
+
+            // Add user message
+            addMessage('user', message);
+
+            // Process the message
+            await processTextQuery(message);
+
+            // Re-enable send button
+            sendButton.disabled = false;
+            textInput.focus();
+        }
+
+        // Process text query
+        async function processTextQuery(query) {
+            addMessage('assistant', '⏳ Processing...');
+
+            try {
+                const response = await fetch(`${API_BASE}/api/chat`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        message: query,
+                        language: 'auto'
+                    })
+                });
+
+                const data = await response.json();
+                
+                // Remove processing message
+                const processingMsg = chatContainer.querySelector('.message.assistant:last-child');
+                if (processingMsg && processingMsg.textContent.includes('Processing')) {
+                    processingMsg.remove();
+                }
+
+                if (data.success) {
+                    const lang = data.detected_language || data.language || 'en';
+                    addMessage('assistant', data.response, lang);
+                } else {
+                    addMessage('assistant', '❌ Error: ' + (data.error || 'Unknown error'));
+                }
+            } catch (error) {
+                console.error('❌ API error:', error);
+                const processingMsg = chatContainer.querySelector('.message.assistant:last-child');
+                if (processingMsg) processingMsg.remove();
+                addMessage('assistant', '❌ Connection error. Please check if the server is running.');
+            }
+        }
+
+        // Request microphone permission
+        async function requestMicrophonePermission() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                stream.getTracks().forEach(track => track.stop());
+                permissionGranted = true;
+                updatePermissionStatus('granted');
+                addMessage('assistant', '✅ Microphone access granted!');
+            } catch (error) {
+                console.error('Microphone permission denied:', error);
+                permissionGranted = false;
+                updatePermissionStatus('denied');
+                addMessage('assistant', '❌ Microphone access denied. Please enable it in your browser settings.');
+            }
+        }
+
+        // Update permission status UI
+        function updatePermissionStatus(status) {
+            permissionStatus.className = `permission-status ${status}`;
+            const messages = {
+                granted: '✅ Microphone permission: Granted',
+                denied: '❌ Microphone permission: Denied - Please allow access',
+                pending: '⏳ Microphone permission: Requesting...'
+            };
+            permissionStatus.innerHTML = `<strong>${messages[status]}</strong>`;
+        }
+
+        // Setup speech recognition for wake word detection
+        function setupSpeechRecognition() {
+            recognition = new webkitSpeechRecognition();
+            recognition.continuous = true;
+            recognition.interimResults = false;
+            recognition.lang = 'en-IN'; // Supports English and Hindi
+
+            recognition.onresult = (event) => {
+                const transcript = event.results[event.results.length - 1][0].transcript.toLowerCase().trim();
+                console.log('🎤 Heard:', transcript);
+
+                // Normal Mode: Process directly without wake word
+                if (isNormalMode && !isStandardMode) {
+                    addMessage('system', `📝 Heard: "${transcript}"`);
+                    addMessage('user', transcript);
+                    processVoiceQuery(transcript);
+                    return;
+                }
+
+                // Standard Mode: Check for wake words
+                if (isStandardMode) {
+                    // Always show what was heard
+                    addMessage('system', `📝 Heard: "${transcript}"`);
+
+                    // Check for wake words with better matching
+                    let wakeWordDetected = false;
+                    let detectedWord = '';
+                    
+                    // Check if transcript contains "shadow" and any trigger word
+                    const hasShadow = transcript.includes('shadow') || 
+                                     transcript.includes('शैडो') || 
+                                     transcript.includes('shed') || 
+                                     transcript.includes('shado');
+                    
+                    if (hasShadow) {
+                        // Check for trigger words
+                        const triggers = ['hey', 'hi', 'hello', 'ok', 'okay', 'sunn', 'suno', 'bol', 'kya', 'are'];
+                        wakeWordDetected = triggers.some(trigger => transcript.includes(trigger));
+                        
+                        if (wakeWordDetected) {
+                            detectedWord = transcript;
+                        }
+                    }
+                    
+                    if (wakeWordDetected) {
+                        console.log('✅ Wake word detected!', detectedWord);
+                        if (wakeSoundEnabled) playWakeSound();
+                        addMessage('system', `🔔 Wake word detected: "${detectedWord}"`);
+                        addMessage('system', '👂 Listening for your question...');
+                        
+                        // Stop current recognition
+                        recognition.stop();
+                        isProcessing = true;
+                        
+                        // Extract query after wake word
+                        let query = transcript;
+                        WAKE_WORDS.forEach(word => {
+                            query = query.replace(word, '').trim();
+                        });
+                        
+                        // Remove common wake word parts
+                        query = query.replace(/hey|hi|hello|ok|okay|sunn|suno|bol|kya|shadow|शैडो/gi, '').trim();
+                        
+                        if (query && query.length > 2) {
+                            addMessage('user', query);
+                            processVoiceQuery(query);
+                        } else {
+                            // Listen for the actual query
+                            setTimeout(() => {
+                                startListeningForQuery();
+                            }, 500);
+                        }
+                    } else {
+                        // Not a wake word - show feedback
+                        addMessage('system', `❌ Not a wake word. Say: "Hey Shadow" or "Sunn Shadow"`);
+                    }
+                }
+            };
+
+            recognition.onerror = (event) => {
+                console.error('Speech recognition error:', event.error);
+                if (event.error === 'no-speech') {
+                    // Silently restart if no speech detected
+                    if (isStandardMode && isListening) {
+                        recognition.start();
+                    }
+                }
+            };
+
+            recognition.onend = () => {
+                if (isStandardMode && isListening && !isProcessing) {
+                    // Auto-restart in standard mode
+                    setTimeout(() => {
+                        try {
+                            recognition.start();
+                        } catch (e) {
+                            console.log('Recognition restart delayed');
+                        }
+                    }, 100);
+                }
+            };
+        }
+
+        // Play wake sound (beep)
+        function playWakeSound() {
+            if (!wakeSoundEnabled) return;
+            
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            
+            // First beep
+            const oscillator1 = audioContext.createOscillator();
+            const gainNode1 = audioContext.createGain();
+            oscillator1.connect(gainNode1);
+            gainNode1.connect(audioContext.destination);
+            oscillator1.frequency.value = 1000; // 1000 Hz
+            gainNode1.gain.setValueAtTime(0.3, audioContext.currentTime);
+            gainNode1.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
+            oscillator1.start(audioContext.currentTime);
+            oscillator1.stop(audioContext.currentTime + 0.1);
+            
+            // Second beep
+            const oscillator2 = audioContext.createOscillator();
+            const gainNode2 = audioContext.createGain();
+            oscillator2.connect(gainNode2);
+            gainNode2.connect(audioContext.destination);
+            oscillator2.frequency.value = 800; // 800 Hz
+            gainNode2.gain.setValueAtTime(0.3, audioContext.currentTime + 0.15);
+            gainNode2.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+            oscillator2.start(audioContext.currentTime + 0.15);
+            oscillator2.stop(audioContext.currentTime + 0.3);
+        }
+
+        // Start listening for query after wake word
+        function startListeningForQuery() {
+            addMessage('system', '👂 Listening for your question...');
+            
+            // Create a one-time listener for the actual query
+            const queryRecognition = new webkitSpeechRecognition();
+            queryRecognition.continuous = false;
+            queryRecognition.interimResults = false;
+            queryRecognition.lang = 'en-IN';
+
+            queryRecognition.onresult = (event) => {
+                const query = event.results[0][0].transcript.trim();
+                console.log('📝 Query heard:', query);
+                
+                // Remove any lingering wake words
+                let cleanQuery = query.replace(/hey|hi|hello|ok|okay|sunn|suno|bol|kya|shadow|शैडो/gi, '').trim();
+                
+                if (cleanQuery && cleanQuery.length > 2) {
+                    addMessage('user', cleanQuery);
+                    processVoiceQuery(cleanQuery);
+                } else {
+                    addMessage('user', query);
+                    processVoiceQuery(query);
+                }
+            };
+
+            queryRecognition.onerror = (event) => {
+                console.error('Query recognition error:', event.error);
+                addMessage('assistant', '❓ Sorry, I didn\'t catch that. Please try again.');
+                isProcessing = false;
+                
+                // Restart standard mode listening
+                if (isStandardMode) {
+                    setTimeout(() => startStandardMode(), 1000);
+                }
+            };
+            
+            queryRecognition.onend = () => {
+                // Will be handled by processVoiceQuery or onerror
+            };
+
+            try {
+                queryRecognition.start();
+            } catch (e) {
+                console.error('Failed to start query recognition:', e);
+                addMessage('assistant', '❌ Failed to start listening. Please try again.');
+                isProcessing = false;
+                if (isStandardMode) {
+                    setTimeout(() => startStandardMode(), 1000);
+                }
+            }
+        }
+
+        // Process voice query
+        async function processVoiceQuery(query) {
+            if (!query) return;
+
+            console.log('💬 Processing query:', query);
+            addMessage('assistant', '⏳ Processing...', null, true);
+
+            try {
+                const response = await fetch(`${API_BASE}/api/chat`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        message: query,
+                        language: 'auto'
+                    })
+                });
+
+                const data = await response.json();
+                
+                // Remove processing message
+                const processingMsg = chatContainer.querySelector('.message.assistant:last-child');
+                if (processingMsg && processingMsg.textContent.includes('Processing')) {
+                    processingMsg.remove();
+                }
+
+                if (data.success) {
+                    const lang = data.detected_language || data.language || 'en';
+                    addMessage('assistant', data.response, lang);
+                    speak(data.response, lang);
+                } else {
+                    addMessage('assistant', '❌ Error: ' + (data.error || 'Unknown error'));
+                }
+            } catch (error) {
+                console.error('❌ API error:', error);
+                const processingMsg = chatContainer.querySelector('.message.assistant:last-child');
+                if (processingMsg) processingMsg.remove();
+                addMessage('assistant', '❌ Connection error. Please check if the server is running.');
+            } finally {
+                isProcessing = false;
+                
+                // Restart listening after response based on mode
+                if (isNormalMode && !isStandardMode) {
+                    // Normal mode: restart immediately
+                    setTimeout(() => {
+                        console.log('🔄 Restarting normal mode listening...');
+                        startNormalMode();
+                    }, 1000);
+                } else if (isStandardMode) {
+                    // Standard mode: restart wake word detection
+                    setTimeout(() => {
+                        console.log('🔄 Restarting wake word detection...');
+                        startStandardMode();
+                    }, 1500);
+                }
+            }
+        }
+
+        // Text-to-speech with Hindi support
+        async function speak(text, language = 'en') {
+            // Use server-side Hindi TTS for better pronunciation
+            if (language === 'hi') {
+                try {
+                    console.log('🔊 Using server Hindi TTS for:', text);
+                    const response = await fetch(`${API_BASE}/api/tts/hindi`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            text: text,
+                            language: 'hi'
+                        })
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        // Decode base64 audio and play
+                        const audioData = atob(data.audio);
+                        const audioArray = new Uint8Array(audioData.length);
+                        for (let i = 0; i < audioData.length; i++) {
+                            audioArray[i] = audioData.charCodeAt(i);
+                        }
+                        const audioBlob = new Blob([audioArray], { type: 'audio/mp3' });
+                        const audioUrl = URL.createObjectURL(audioBlob);
+                        const audio = new Audio(audioUrl);
+                        
+                        audio.onended = () => {
+                            URL.revokeObjectURL(audioUrl);
+                        };
+                        
+                        audio.play();
+                        console.log('✅ Hindi TTS played successfully');
+                    } else {
+                        console.error('Hindi TTS error:', data.error);
+                        // Fallback to browser TTS
+                        speakWithBrowserTTS(text, language);
+                    }
+                } catch (error) {
+                    console.error('Hindi TTS API error:', error);
+                    // Fallback to browser TTS
+                    speakWithBrowserTTS(text, language);
+                }
+            } else {
+                // Use browser TTS for English
+                speakWithBrowserTTS(text, language);
+            }
+        }
+        
+        // Browser-based TTS (fallback)
+        function speakWithBrowserTTS(text, language = 'en') {
+            if ('speechSynthesis' in window) {
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = language === 'hi' ? 'hi-IN' : 'en-US';
+                utterance.rate = language === 'hi' ? 0.9 : 1.0;
+                window.speechSynthesis.speak(utterance);
+            }
+        }
+
+        // Handle mode toggle
+        function handleModeToggle() {
+            isStandardMode = modeToggle.checked;
+            updateModeUI();
+
+            if (isStandardMode) {
+                startStandardMode();
+            } else {
+                stopStandardMode();
+            }
+        }
+
+        // Update mode UI
+        function updateModeUI() {
+            if (isStandardMode) {
+                standardMode.classList.add('active');
+                simpleMode.classList.remove('active');
+                micButton.title = 'Always listening for wake words';
+            } else {
+                simpleMode.classList.add('active');
+                standardMode.classList.remove('active');
+                micButton.title = 'Click to start listening';
+            }
+        }
+
+        // Start standard mode (always-on)
+        function startStandardMode() {
+            if (!permissionGranted) {
+                addMessage('assistant', '⚠️ Please grant microphone permission first.');
+                return;
+            }
+
+            isListening = true;
+            micButton.classList.add('always-on');
+            statusText.textContent = '👂 Always listening for wake words...';
+            statusText.classList.add('always-on');
+
+            try {
+                recognition.start();
+                addMessage('assistant', '🔄 Standard mode activated. Say a wake word to begin!');
+            } catch (e) {
+                console.log('Recognition already started or error:', e);
+            }
+        }
+
+        // Stop standard mode
+        function stopStandardMode() {
+            isListening = false;
+            micButton.classList.remove('always-on');
+            statusText.textContent = 'Click to start';
+            statusText.classList.remove('always-on');
+
+            if (recognition) {
+                try {
+                    recognition.stop();
+                } catch (e) {
+                    console.log('Recognition stop error:', e);
+                }
+            }
+
+            addMessage('assistant', '📱 Switched to Simple mode. Click the mic to talk.');
+        }
+
+        // Handle mic button click (for simple mode)
+        async function handleMicClick() {
+            if (isStandardMode) {
+                // In standard mode, button shows status, doesn't toggle
+                return;
+            }
+
+            if (!permissionGranted) {
+                await requestMicrophonePermission();
+                return;
+            }
+
+            if (isListening) {
+                stopSimpleMode();
+            } else {
+                startSimpleMode();
+            }
+        }
+
+        // Start simple mode listening
+        function startSimpleMode() {
+            isListening = true;
+            micButton.classList.add('listening');
+            statusText.textContent = '🎤 Listening... Speak now!';
+            statusText.classList.add('listening');
+
+            const simpleRecognition = new webkitSpeechRecognition();
+            simpleRecognition.continuous = false;
+            simpleRecognition.interimResults = false;
+            simpleRecognition.lang = 'en-IN';
+
+            simpleRecognition.onresult = (event) => {
+                const query = event.results[0][0].transcript.trim();
+                console.log('Simple mode query:', query);
+                processVoiceQuery(query);
+                stopSimpleMode();
+            };
+
+            simpleRecognition.onerror = (event) => {
+                console.error('Simple mode error:', event.error);
+                addMessage('assistant', '❌ Error listening. Please try again.');
+                stopSimpleMode();
+            };
+
+            simpleRecognition.onend = () => {
+                stopSimpleMode();
+            };
+
+            try {
+                simpleRecognition.start();
+            } catch (e) {
+                console.error('Failed to start simple mode:', e);
+                stopSimpleMode();
+            }
+        }
+
+        // Stop simple mode listening
+        function stopSimpleMode() {
+            isListening = false;
+            micButton.classList.remove('listening');
+            statusText.textContent = 'Click to start';
+            statusText.classList.remove('listening');
+        }
+
+        // Add message to chat
+        function addMessage(type, content, language = '') {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${type}`;
+            
+            let icon = '🌟';
+            if (type === 'user') icon = '👤';
+            else if (type === 'system') icon = '🔔';
+            
+            const langTag = language ? `<span class="language-indicator">${language.toUpperCase()}</span>` : '';
+            
+            messageDiv.innerHTML = `
+                <div class="message-icon">${icon}</div>
+                <div class="message-content">${content}${langTag}</div>
+            `;
+            
+            chatContainer.appendChild(messageDiv);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+
+        // Initialize on page load
+        window.addEventListener('DOMContentLoaded', initialize);
+
+        // Handle page visibility (standard mode)
+        document.addEventListener('visibilitychange', () => {
+            if (isStandardMode) {
+                if (document.hidden) {
+                    console.log('Page hidden - continuing to listen');
+                } else {
+                    console.log('Page visible - ensuring listening is active');
+                    if (isListening && !isProcessing) {
+                        try {
+                            recognition.start();
+                        } catch (e) {
+                            console.log('Recognition already running');
+                        }
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>
